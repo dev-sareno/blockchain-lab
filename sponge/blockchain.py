@@ -9,4 +9,7 @@ mining_difficulty: str = '000'
 
 class Blockchain:
     def __init__(self):
-        pass
+        self.transactions = []
+
+    def add_transaction(self, txn: Transaction):
+        self.transactions.append(txn)
