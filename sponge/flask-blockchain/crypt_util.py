@@ -26,7 +26,7 @@ def generate_address(public_key: str) -> str:
     return address
 
 
-def sign_message(private_key: str, msg: str) -> str:
+def sign_message(private_key: str, msg_hash: str) -> str:
     """
     signs a message
     :param private_key:
@@ -34,16 +34,14 @@ def sign_message(private_key: str, msg: str) -> str:
     :return: signature in bytes
     """
     sk = SigningKey.from_string(bytes.fromhex(private_key), curve=SECP256k1)
-    signature = sk.sign(msg.encode('utf-8')).hex()
+    signature = sk.sign(bytes.fromhex(msg_hash)).hex()
     return signature
 
 
-def verify_message(public_key: str, signature: str, msg: str) -> bool:
-    print(signature)
-    pub = bytes.fromhex(public_key)
-    vk = VerifyingKey.from_string(pub, curve=SECP256k1)
+def verify_message(public_key: str, signature: str, msg_hash: str) -> bool:
+    vk = VerifyingKey.from_string(bytes.fromhex(public_key), curve=SECP256k1)
     sig = bytes.fromhex(signature)
-    return vk.verify(sig, msg.encode('utf-8'))
+    return vk.verify(sig, bytes.fromhex(msg_hash))
 
 
 def verify_hash(h: str, msg: bytes):

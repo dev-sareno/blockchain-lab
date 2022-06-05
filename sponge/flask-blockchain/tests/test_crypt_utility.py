@@ -19,11 +19,12 @@ def test_should_sign_and_verify_message():
     # generate key-pair first
     private, public = generate_keypair('do not eat poop')
     message = 'Hello World!'
+    message_hash = hashlib.sha256(message.encode()).hexdigest()
     # sign
-    signature = sign_message(private, message)
+    signature = sign_message(private, message_hash)
     # signature is unique everytime it is generated unlike hashing so we can'r assert the signature with static value
     # verify
-    verified = verify_message(public, signature, message)
+    verified = verify_message(public, signature, message_hash)
     assert verified
 
 
