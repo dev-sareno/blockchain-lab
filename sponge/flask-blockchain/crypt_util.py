@@ -46,6 +46,6 @@ def verify_message(public_key: str, signature: str, msg: str) -> bool:
     return vk.verify(sig, msg.encode('utf-8'))
 
 
-def verify_hash(h: bytes, msg: bytes):
-    h2 = hashlib.sha256(msg).hexdigest().encode('utf-8')
+def verify_hash(h: str, msg: bytes):
+    h2 = hashlib.sha256(msg).hexdigest()
     return h2 == h

@@ -30,5 +30,5 @@ def test_should_sign_and_verify_message():
 def test_should_match_hash():
     message = b'Hello World!'
     # create a hash using hashlib
-    h = hashlib.sha256(message).hexdigest().encode()
+    h = hashlib.sha256(message).hexdigest()
     assert verify_hash(h, message)  # uses non-hashlib library
