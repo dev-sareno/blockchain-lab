@@ -2,8 +2,7 @@ import hashlib
 from datetime import datetime
 from typing import Tuple
 
-from fastecdsa import keys, curve, ecdsa
-from fastecdsa.point import Point
+from ecdsa import SigningKey, SECP256k1, VerifyingKey
 import base58
 
 
@@ -15,43 +14,38 @@ def generate_keypair(
     :return: tuple(private, public)
     """
     # generate private
-    h = hashlib.sha256(pass_phrase.encode('utf-8')).hexdigest()
-    private = base58.b58encode(h.encode('utf-8')).decode('utf-8')
-    # generate public
-    d = int(base58.b58decode(private), 16)
-    p = keys.get_public_key(d, curve=curve.secp256k1)
-    public = base58.b58encode(hex(p.x).replace('0x', '') + hex(p.y).replace('0x', '')).decode('utf-8')
-    return private, public
+    pass_phrase_hash = hashlib.sha256(pass_phrase.encode('utf-8')).hexdigest()
+    sk = SigningKey.from_string(bytes.fromhex(pass_phrase_hash), curve=SECP256k1)
+    vk = sk.verifying_key
+    return sk.to_string().hex(), '04' + vk.to_string().hex()  # prefix 04 means uncompressed public key
 
 
 def generate_address(public_key: str) -> str:
-    h = hashlib.sha256(public_key.encode('utf-8')).hexdigest()
-    address = 'spNg' + base58.b58encode(h.encode('utf-8')).decode('utf-8')
+    hash = hashlib.sha256(public_key.encode('utf-8')).hexdigest()
+    address = 'spNg' + base58.b58encode(hash.encode('utf-8')).decode('utf-8')
     return address
 
 
-def sign_message(private_key: str, msg: str) -> Tuple[int, int]:
+def sign_message(private_key: str, msg: str) -> str:
     """
     signs a message
     :param private_key:
     :param msg:
     :return: signature in bytes
     """
-    private_hex = base58.b58decode(private_key)
-    r, s = ecdsa.sign(msg, int(private_hex, 16), curve=curve.secp256k1)
-    return r, s
+    sk = SigningKey.from_string(bytes.fromhex(private_key), curve=SECP256k1)
+    signature = sk.sign(msg.encode('utf-8')).hex()
+    return signature
 
 
-def verify_message(public_key: str, msg: str, rs: Tuple[int, int]) -> bool:
-    pub = base58.b58decode(public_key.replace('spNg', '')).decode('utf-8')
-    print(f'pub={pub}')
-    xs = int(pub[:64], 16)
-    ys = int(pub[64:], 16)
-    point = Point(xs, ys, curve=curve.secp256k1)
-    valid = ecdsa.verify(rs, msg, point, curve=curve.secp256k1)
-    return valid
+def verify_message(public_key: str, signature: str, msg: str) -> bool:
+    print(signature)
+    pub = bytes.fromhex(public_key)
+    vk = VerifyingKey.from_string(pub, curve=SECP256k1)
+    sig = bytes.fromhex(signature)
+    return vk.verify(sig, msg.encode('utf-8'))
 
 
 def verify_hash(h: bytes, msg: bytes):
-    h2 = hashlib.sha256(msg).hexdigest().encode()
+    h2 = hashlib.sha256(msg).hexdigest().encode('utf-8')
     return h2 == h

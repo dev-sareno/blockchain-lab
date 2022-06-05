@@ -5,20 +5,14 @@ from crypt_util import generate_keypair, sign_message, verify_message, verify_ha
 
 def test_should_generate_correct_key_pair():
     private, public = generate_keypair('do not eat poop')
-    assert private == '23khNa24apaujVhWTLWGEETtDCgdXrFCBFsCYx9rg8AhmGYMuE8uSTNCi4vTE' \
-                      'VVdGb9fX1Z4F81yuDGV7beb3DRr'
-    assert public == '6eh4mkPxACW5agtsywhNaPmFTWUYzPRZGbHVka8pE5V71y7En6ksBRe88aZifBAZdGxm' \
-                     'ArD795rj2tv74jger7K796itQcKTy2eJnQQrGq1Njkenogd1QQm6eoyfGoebMqf3dvaFzif' \
-                     'pH3nttgs4AiNkzZ9hqJj9gvmAL3fmAKMsX7K'
+    assert private == '4d3dacf3627c1fb2431ebc9ede906142e41781323640e68a4807c63a81aa5c9a'
+    assert public == '047657acefc0f0358efcfda3a0d2cf6d8212a5a1693c7213e1c3ca5035f4d4f5781041b8d18f0c967a1a31cefbaf52508a4e0f6c40f5d04d6482f17a73e50ca5f6'
 
 
 def test_should_generate_correct_address():
-    public = '6eh4mkPxACW5agtsywhNaPmFTWUYzPRZGbHVka8pE5V71y7En6ksBRe88aZifBAZdGxm' \
-             'ArD795rj2tv74jger7K796itQcKTy2eJnQQrGq1Njkenogd1QQm6eoyfGoebMqf3dvaFzif' \
-             'pH3nttgs4AiNkzZ9hqJj9gvmAL3fmAKMsX7K'
+    public = '047657acefc0f0358efcfda3a0d2cf6d8212a5a1693c7213e1c3ca5035f4d4f5781041b8d18f0c967a1a31cefbaf52508a4e0f6c40f5d04d6482f17a73e50ca5f6'
     address = generate_address(public)
-    assert address == 'spNg264jXCfovDvuHxRifp3APaa4S6oVyzVMbsB5KHWja7qV9cXAJPE5SvuEY' \
-                      'QdE7u2hDrawUKy1ALbfCj7f8GbDUp6q'
+    assert address == 'spNg21EN4hs5NUprKGGo4Pyeocf9dG225kovCykGextGsSJn9NkKBXoHNTqYk18vshRb9ivD8dEfgaruNNW96UHQmFg7'
 
 
 def test_should_sign_and_verify_message():
@@ -26,9 +20,10 @@ def test_should_sign_and_verify_message():
     private, public = generate_keypair('do not eat poop')
     message = 'Hello World!'
     # sign
-    r, s = sign_message(private, message)
+    signature = sign_message(private, message)
+    # signature is unique everytime it is generated unlike hashing so we can'r assert the signature with static value
     # verify
-    verified = verify_message(public, message, (r, s))
+    verified = verify_message(public, signature, message)
     assert verified
 
 
