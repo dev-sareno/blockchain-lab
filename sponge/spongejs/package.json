@@ -1,0 +1,22 @@
+{
+  "name": "spongejs",
+  "version": "1.0.0",
+  "description": "Sponge Blockchain",
+  "main": "app.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "dev-sareno",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "express": "^4.18.1",
+    "secp256k1": "^4.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
+  }
+}

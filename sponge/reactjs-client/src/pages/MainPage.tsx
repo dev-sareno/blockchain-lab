@@ -29,14 +29,23 @@ const MainPage = () => {
         timestamp: timestamp,
         data: message
       });
+      console.log({payload});
 
       // calculate signature
       const payloadHash = CryptoJS.SHA256(payload).toString();
+      console.log({payloadHash});
       const payloadHashBytes = hexStringToUintArray(payloadHash);
       const signerKey = hexStringToUintArray(privateKey);
       const signatureObj = secp256k1.ecdsaSign(payloadHashBytes, signerKey);
       const signatureHex = uintArrayToHexString(signatureObj.signature);
       setSignature(signatureHex);
+
+      
+      const msg = 'ab';
+      const msgBytes = hexStringToUintArray(msg);
+      console.log({msgBytes});
+      
+      // const msgSig = secp256k1.ecdsaSign(payloadHashBytes, signerKey);
 
       const txn = {
         payload: payload,
@@ -66,14 +75,7 @@ const MainPage = () => {
   };
 
   const onSubmitClickedHandler = async () => {
-    const body = {
-      timestamp: timestamp,
-      payload: message,
-      hash: hash,
-      signature: signature,
-      public_key: publicKey,
-    };
-    const res = await postTransaction(body);
+    const res = await postTransaction(JSON.parse(transaction));
     console.log({res})
   };
 
