@@ -27,4 +27,13 @@ module.exports = (app) => {
     app.get('/chain/isvalid', (req, res) => {
         res.send(blockchain.isChainValid(blockchain.getChain()));
     });
+    
+    app.post('/debug/chain/add-invalid-block', (req, res) => {
+        blockchain.debugAddInvalidBlock();
+        res.send('ok');
+    });
+    
+    app.get('/debug/chain-transaction', (req, res) => {
+        res.send(blockchain.debugGetChainTransactions());
+    });
 }

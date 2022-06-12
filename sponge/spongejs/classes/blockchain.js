@@ -21,6 +21,18 @@ class Transaction {
     }
 }
 
+const genesisBlockHash = [...Array(64).keys()].map(_ => '0').join('');
+
+const getGenesisTransaction = () => {
+    const genesisTxn = new Transaction(
+        '',
+        'f87073772a171860b05df64e864c81afb7dc34fd6367ba7153ca38a4892499390483dc5c9970dda2e9238921cb46fa054b2a064abf32ca9905681df70ca9957d',
+        '0435ff4b082a30246b1e699fd0f6fd869e682f8cffcd5fe50b5b259fe22bfcf65df3ed31c704348732ce8e6bf61135ca4814bac51bbeaa8b4bac3dd3f6c0bef8c0',
+        'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
+    );
+    return genesisTxn;
+};
+
 class Blockchain {
     static #DIFFICULTY = '000';
     static #TXN_PER_BLOCK = 3;
@@ -31,15 +43,19 @@ class Blockchain {
     #chainTransactions = new Set();
 
     constructor() {
-        const genesisHash = [...Array(64).keys()].map(_ => '0').join('');
-        const genesisTxn = new Transaction(
-            '',
-            'f87073772a171860b05df64e864c81afb7dc34fd6367ba7153ca38a4892499390483dc5c9970dda2e9238921cb46fa054b2a064abf32ca9905681df70ca9957d',
-            '0435ff4b082a30246b1e699fd0f6fd869e682f8cffcd5fe50b5b259fe22bfcf65df3ed31c704348732ce8e6bf61135ca4814bac51bbeaa8b4bac3dd3f6c0bef8c0',
-            'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855'
-        );
-        const genesisBlock = this.mineBlock(genesisHash, [genesisTxn]);
+        const genesisTxn = getGenesisTransaction();
+        const genesisBlock = this.mineBlock(genesisBlockHash, [genesisTxn]);
         this.#chain.push(genesisBlock);
+        this.#chainTransactions.add(genesisTxn.header.hash);
+    }
+
+    debugAddInvalidBlock() {
+        this.#chain.push(this.#chain[0]);
+    }
+
+    debugGetChainTransactions() {
+        return Array.from(this.#chainTransactions)
+            .map((v, i) => ({index: i, txnHash: v}));
     }
 
     mineBlock(previousHash, transactions) {
@@ -64,16 +80,23 @@ class Blockchain {
     }
 
     addTransactions(transactions) {
+        /*
+        Assumes all param:transactions here is not a duplicate
+        */
         this.#transactions.push(...transactions);
         if (this.#transactions.length >= Blockchain.#TXN_PER_BLOCK) {
             // mine new block
             const lastBlock = this.getLastBlock();
+            // get transactions from the queue
             const txns = this.#transactions.splice(0, Blockchain.#TXN_PER_BLOCK);
             const newBlock = this.mineBlock(lastBlock.header.hash, txns);
             this.#chain.push(newBlock);
-            // remove from transactions
-            for (let i = 0; i < Blockchain.#TXN_PER_BLOCK; i++) {
-                this.#transactions.pop(i);
+            for (const txn of txns) {
+                // add to chain's transaction
+                this.#chainTransactions.add(txn.header.hash);
+            }
+            if (this.#transactions.length > 0) {
+                this.addTransactions([]);
             }
         }
     }
