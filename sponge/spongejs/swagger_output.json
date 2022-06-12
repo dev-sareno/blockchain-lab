@@ -53,6 +53,17 @@
         }
       }
     },
+    "/transaction/broadcast": {
+      "post": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/chain": {
       "get": {
         "description": "",
@@ -76,6 +87,31 @@
       }
     },
     "/network/connect": {
+      "post": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad Request"
+          }
+        }
+      }
+    },
+    "/network/ping": {
+      "get": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/network": {
       "get": {
         "description": "",
         "parameters": [],

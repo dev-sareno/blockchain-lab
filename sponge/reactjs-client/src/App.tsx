@@ -1,24 +1,36 @@
 import React from 'react';
 import logo from './logo.svg';
 import './App.css';
+import ReactDOM from "react-dom/client";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  Link,
+} from "react-router-dom";
+import TransactionPage from './pages/transaction/TransactionPage';
+import NodePage from './pages/node/NodePage';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <BrowserRouter>
+        <nav
+          className='nav'
+          style={{
+            marginBottom: '30px'
+          }}>
+          <Link to="/transaction">Transaction</Link> |{" "}
+          <Link to="/node">Node</Link>
+        </nav>
+        <Routes>
+          <Route path="/transaction" element={<TransactionPage />} />
+          <Route path="/node" element={<NodePage />} />
+          <Route path="/" element={<Navigate to={'/transaction'} replace />} />
+          <Route path="*" element={<div>Not found</div>} />
+        </Routes>
+      </BrowserRouter>
     </div>
   );
 }

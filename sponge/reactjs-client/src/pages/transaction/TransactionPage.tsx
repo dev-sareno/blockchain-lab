@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { postTransaction } from "../api";
+import { postTransaction } from "../../api";
 import CryptoJS from "crypto-js";
 import secp256k1 from 'secp256k1';
-import { hexStringToUintArray, uintArrayToHexString } from "../utility/byte.util";
+import { hexStringToUintArray, uintArrayToHexString } from "../../utility/byte.util";
 
 const privateKeys: string[] = [
   CryptoJS.SHA256('poop').toString(),
   CryptoJS.SHA256('fart').toString(),
 ];
 
-const MainPage = () => {
+const TransactionPage = () => {
   const [timestamp, setTimestamp] = useState<number>(new Date().getTime());
   const [message, setMessage] = useState<string>('');
   const [hash, setHash] = useState<string>('');
@@ -25,18 +25,18 @@ const MainPage = () => {
     setPublicKey(pubKeyHex);
 
     if (message) {
-      const payload = JSON.stringify({
+      const data = JSON.stringify({
         timestamp: timestamp,
         data: message
       });
-      console.log({payload});
+      console.log({data});
 
       // calculate signature
-      const payloadHash = CryptoJS.SHA256(payload).toString();
-      console.log({payloadHash});
-      const payloadHashBytes = hexStringToUintArray(payloadHash);
+      const dataHash = CryptoJS.SHA256(data).toString();
+      console.log({dataHash});
+      const dataHashBytes = hexStringToUintArray(dataHash);
       const signerKey = hexStringToUintArray(privateKey);
-      const signatureObj = secp256k1.ecdsaSign(payloadHashBytes, signerKey);
+      const signatureObj = secp256k1.ecdsaSign(dataHashBytes, signerKey);
       const signatureHex = uintArrayToHexString(signatureObj.signature);
       setSignature(signatureHex);
 
@@ -45,18 +45,18 @@ const MainPage = () => {
       const msgBytes = hexStringToUintArray(msg);
       console.log({msgBytes});
       
-      // const msgSig = secp256k1.ecdsaSign(payloadHashBytes, signerKey);
+      // const msgSig = secp256k1.ecdsaSign(dataHashBytes, signerKey);
 
       const txn = {
-        payload: payload,
+        data: data,
         "header": {
-          hash: payloadHash,
+          hash: dataHash,
           signature: signatureHex,
           publicKey: pubKeyHex
         }
       };
       setTransaction(JSON.stringify(txn));
-      setHash(payloadHash);
+      setHash(dataHash);
     } else {
       setHash('');
       setSignature('');
@@ -159,4 +159,4 @@ const MainPage = () => {
   )
 };
 
-export default MainPage;
+export default TransactionPage;

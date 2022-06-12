@@ -7,7 +7,12 @@ const http = axios.create({
   }
 });
 
-export const postTransaction = async (message: any) => {
-  const response = await http.post<string>('transaction', message);
+export const postTransaction = async (body: any) => {
+  const response = await http.post<string>('transaction', body);
+  return response.data;
+};
+
+export const postNetworkConnect = async (body: any) => {
+  const response = await http.post<any>('network/connect', body);
   return response.data;
 };

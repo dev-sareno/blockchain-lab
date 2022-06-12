@@ -6,12 +6,14 @@
   "type": "commonjs",
   "scripts": {
     "start": "npm run gdoc && nodemon app.js",
+    "start:norealod": "npm run gdoc && node app.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "gdoc": "echo 'Generating swagger doc...' && node swagger.js"
   },
   "author": "dev-sareno",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.27.2",
     "chai": "^4.3.6",
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",

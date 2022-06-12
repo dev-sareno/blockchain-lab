@@ -1,4 +1,6 @@
+const { create: axiosCreate } = require("axios");
 const CryptoJS = require("crypto-js");
+const { PORT } = require("../app.config");
 
 class Block {
     constructor(previousHash, nonce, timestamp, transactions) {
@@ -18,6 +20,12 @@ class Transaction {
             publicKey: publicKey,
             hash: hash,
         }
+    }
+}
+
+class NetworkNode {
+    constructor(address) {
+        this.address = address;
     }
 }
 
@@ -41,12 +49,34 @@ class Blockchain {
     // to make it simple, we don't use merkle tree to validate transaction,
     // instead, we store transactions in in-memory database
     #chainTransactions = new Set();
+    #network = [];
 
     constructor() {
         const genesisTxn = getGenesisTransaction();
         const genesisBlock = this.mineBlock(genesisBlockHash, [genesisTxn]);
         this.#chain.push(genesisBlock);
         this.#chainTransactions.add(genesisTxn.header.hash);
+        this.addNetworkNode(new NetworkNode(`localhost:${PORT}`));
+    }
+
+    async joinNetwork(networkAddress) {
+        try {
+            const {data} = await axiosCreate({
+                baseURL: `http://${networkAddress}/`,
+                timeout: 5000, // 5sec
+            }).post('network/connect', {
+                address: `localhost:${PORT}`
+            });
+            if (data) {
+                for (const node of data) {
+                    this.addNetworkNode(node);
+                }
+            }
+            return true;
+        } catch (e) {
+            console.log('failed to join network. ', e.toString());
+            return false;
+        }
     }
 
     debugAddInvalidBlock() {
@@ -137,10 +167,23 @@ class Blockchain {
     isTransactionIncluded(txnHash) {
         return this.#chainTransactions.has(txnHash);
     }
+
+    getNetwork() {
+        return this.#network;
+    }
+
+    addNetworkNode(networkNode) {
+        const notExist = this.#network
+            .find(i => i.address === networkNode.address) === undefined;
+        if (notExist) {
+            this.#network.push(networkNode);
+        }
+    }
 }
 
 module.exports = {
     Block,
     Transaction,
     Blockchain,
+    NetworkNode,
 }

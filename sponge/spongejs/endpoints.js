@@ -1,12 +1,10 @@
-const { Blockchain } = require('./classes/blockchain.js');
 const { TransactionManager } = require('./managers/transactionManager.js');
 const { NetworkManager } = require('./managers/networkManager.js');
 
-const blockchain = new Blockchain();
-const txnManager = new TransactionManager(blockchain);
-const networkManager = new NetworkManager(blockchain);
+module.exports = (app, blockchain) => {
+    const txnManager = new TransactionManager(blockchain);
+    const networkManager = new NetworkManager(blockchain);
 
-module.exports = (app) => {
     // /debug
     app.post('/debug/chain/add-invalid-block', (req, res) => {
         blockchain.debugAddInvalidBlock();
@@ -18,13 +16,18 @@ module.exports = (app) => {
     });
     
     // /transaction
-    app.post('/transaction', (req, res) => {
-        txnManager.create(req.body);
+    app.post('/transaction', async (req, res) => {
+        await txnManager.create(req.body);
         res.send('ok');
     });
     
     app.get('/transaction', (req, res) => {
         res.send(blockchain.getTransactions());
+    });
+    
+    app.post('/transaction/broadcast', async (req, res) => {
+        await txnManager.receiveBroadcast(req.body);
+        res.send('ok');
     });
     
     // /chain
@@ -37,8 +40,18 @@ module.exports = (app) => {
     });
     
     // /network
-    app.get('/network/connect', (req, res) => {
-        const network = networkManager.connect(req.body);
-        res.send(network);
+    app.post('/network/connect', async (req, res) => {
+        console.log('connect called()');
+        const network = await networkManager.connect(req.body);
+        res.status(network ? 200 : 400)
+            .send(network ? network : 'Node registration falied');
+    });
+
+    app.get('/network/ping', (req, res) => {
+        res.send('pong');
+    });
+
+    app.get('/network', (req, res) => {
+        res.send(blockchain.getNetwork());
     });
 }
