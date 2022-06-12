@@ -111,8 +111,6 @@ const MainPage = () => {
           <td>Timestamp:</td>
           <td>
             <input type={"text"} value={timestamp.toString()} disabled />
-            <span> </span>
-            <button onClick={onRefreshTimestampClickedHandler}>Refresh</button>
           </td>
         </tr>
 
@@ -147,6 +145,8 @@ const MainPage = () => {
         <tr>
           <td>
             <div>
+              <button onClick={onRefreshTimestampClickedHandler}>Refresh</button>
+              <span> </span>
               <button onClick={onSubmitClickedHandler}>Submit</button>
             </div>
           </td>

@@ -11,7 +11,18 @@
     "http"
   ],
   "paths": {
-    "/": {
+    "/debug/chain/add-invalid-block": {
+      "post": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/debug/chain-transaction": {
       "get": {
         "description": "",
         "parameters": [],
@@ -64,18 +75,7 @@
         }
       }
     },
-    "/debug/chain/add-invalid-block": {
-      "post": {
-        "description": "",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
-    "/debug/chain-transaction": {
+    "/network/connect": {
       "get": {
         "description": "",
         "parameters": [],

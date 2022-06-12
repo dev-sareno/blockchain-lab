@@ -1,16 +1,23 @@
-const { TransactionManager } = require('./managers/transactionManager.js');
 const { Blockchain } = require('./classes/blockchain.js');
+const { TransactionManager } = require('./managers/transactionManager.js');
+const { NetworkManager } = require('./managers/networkManager.js');
 
 const blockchain = new Blockchain();
 const txnManager = new TransactionManager(blockchain);
+const networkManager = new NetworkManager(blockchain);
 
 module.exports = (app) => {
-    app.get('/', (req, res) => {
-        res.send({
-            message: 'Hello World!'
-        });
+    // /debug
+    app.post('/debug/chain/add-invalid-block', (req, res) => {
+        blockchain.debugAddInvalidBlock();
+        res.send('ok');
     });
     
+    app.get('/debug/chain-transaction', (req, res) => {
+        res.send(blockchain.debugGetChainTransactions());
+    });
+    
+    // /transaction
     app.post('/transaction', (req, res) => {
         txnManager.create(req.body);
         res.send('ok');
@@ -20,6 +27,7 @@ module.exports = (app) => {
         res.send(blockchain.getTransactions());
     });
     
+    // /chain
     app.get('/chain', (req, res) => {
         res.send(blockchain.getChain());
     });
@@ -28,12 +36,9 @@ module.exports = (app) => {
         res.send(blockchain.isChainValid(blockchain.getChain()));
     });
     
-    app.post('/debug/chain/add-invalid-block', (req, res) => {
-        blockchain.debugAddInvalidBlock();
-        res.send('ok');
-    });
-    
-    app.get('/debug/chain-transaction', (req, res) => {
-        res.send(blockchain.debugGetChainTransactions());
+    // /network
+    app.get('/network/connect', (req, res) => {
+        const network = networkManager.connect(req.body);
+        res.send(network);
     });
 }
