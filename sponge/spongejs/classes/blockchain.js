@@ -26,6 +26,9 @@ class Blockchain {
     static #TXN_PER_BLOCK = 3;
     #chain = [];
     #transactions = [];
+    // to make it simple, we don't use merkle tree to validate transaction,
+    // instead, we store transactions in in-memory database
+    #chainTransactions = new Set();
 
     constructor() {
         const genesisHash = [...Array(64).keys()].map(_ => '0').join('');
@@ -106,6 +109,10 @@ class Blockchain {
 
     getTransactions() {
         return this.#transactions;
+    }
+
+    isTransactionIncluded(txnHash) {
+        return this.#chainTransactions.has(txnHash);
     }
 }
 

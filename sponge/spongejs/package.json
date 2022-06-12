@@ -5,8 +5,9 @@
   "main": "app.js",
   "type": "commonjs",
   "scripts": {
-    "start": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm run gdoc && nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gdoc": "echo 'Generating swagger doc...' && node swagger.js"
   },
   "author": "dev-sareno",
   "license": "ISC",
@@ -14,7 +15,9 @@
     "cors": "^2.8.5",
     "crypto-js": "^4.1.1",
     "express": "^4.18.1",
-    "secp256k1": "^4.0.3"
+    "secp256k1": "^4.0.3",
+    "swagger-autogen": "^2.21.3",
+    "swagger-ui-express": "^4.4.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.16"
