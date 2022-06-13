@@ -56,7 +56,7 @@ class Blockchain {
         const genesisBlock = this.mineBlock(genesisBlockHash, [genesisTxn]);
         this.#chain.push(genesisBlock);
         this.#chainTransactions.add(genesisTxn.header.hash);
-        this.addNetworkNode(new NetworkNode(`localhost:${PORT}`));
+        this.addNetworkNode(new NetworkNode(this.getNodeAddress()));
     }
 
     async joinNetwork(networkAddress) {
@@ -65,7 +65,7 @@ class Blockchain {
                 baseURL: `http://${networkAddress}/`,
                 timeout: 5000, // 5sec
             }).post('network/connect', {
-                address: `localhost:${PORT}`
+                address: this.getNodeAddress(),
             });
             if (data) {
                 for (const node of data) {
@@ -178,6 +178,10 @@ class Blockchain {
         if (notExist) {
             this.#network.push(networkNode);
         }
+    }
+
+    getNodeAddress() {
+        return `localhost:${PORT}`;
     }
 }
 

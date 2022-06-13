@@ -1,7 +1,10 @@
 import axios from "axios";
 
+const nodeAddress = process.env.REACT_APP_NODE_ADDRESS;
+console.log({nodeAddress});
+
 const http = axios.create({
-  baseURL: 'http://localhost:5001/',
+  baseURL: nodeAddress,
   headers: {
     'Access-Control-Allow-Origin': '*'
   }

@@ -27,15 +27,17 @@ class TransactionManager {
         assert(this.blockchain.isTransactionIncluded(hash) === false, 'Transaction already exists');
     }
 
-    async #broadcastTransaction(txn) {
+    async #broadcastTransaction(body) {
+        const {exclude} = body;
         for (const node of this.blockchain.getNetwork()) {
             const address = node.address;
-            if (address !== `localhost:${PORT}`) {
+            const shouldSend = exclude.find(i => i === address) === undefined;
+            if (shouldSend) {
                 try {
                     const {status} = await axiosCreate({
                         baseURL: `http://${address}/`,
                         timeout: 5000, // 5sec
-                    }).post('transaction/broadcast', txn);
+                    }).post('transaction/broadcast', body);
                     if (status < 200 || status > 299) {
                         console.log(`failed to broadcast transaction to ${address}; status=${status}`);
                     }
@@ -57,12 +59,16 @@ class TransactionManager {
         this.blockchain.addTransactions([txn]);
 
         // broadcast transaction
-        await this.#broadcastTransaction(txn);
+        const data = {
+            exclude: [this.blockchain.getNodeAddress()],
+            transaction: txn,
+        };
+        await this.#broadcastTransaction(data);
     }
 
     async receiveBroadcast(body) {
         try {
-            this.#validateTransaction(body);
+            this.#validateTransaction(body.transaction);
         } catch (e) {
             console.log('transaction aleady received, ignoring..');
             // probably duplicate
@@ -70,10 +76,17 @@ class TransactionManager {
         }
 
         // add to transactions
-        this.blockchain.addTransactions([body]);
+        this.blockchain.addTransactions([body.transaction]);
 
         // rebroadcast transaction
-        await this.#broadcastTransaction(body);
+        const data = {
+            ...body,
+            exclude: [
+                ...body.exclude,
+                this.blockchain.getNodeAddress(),
+            ]
+        };
+        await this.#broadcastTransaction(data);
     }
 }
 
