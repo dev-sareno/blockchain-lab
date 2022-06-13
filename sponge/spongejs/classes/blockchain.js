@@ -165,6 +165,7 @@ class Blockchain {
     }
 
     isTransactionIncluded(txnHash) {
+        console.log('chainTransactions.size=', this.#chainTransactions.size)
         return this.#chainTransactions.has(txnHash);
     }
 

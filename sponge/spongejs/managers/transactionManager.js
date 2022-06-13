@@ -23,8 +23,11 @@ class TransactionManager {
         const verified = verifySignature(signature, hash, publicKey);
         assert(verified === true, 'invalid signature');
 
-        // assert non-duplicate transaction
-        assert(this.blockchain.isTransactionIncluded(hash) === false, 'Transaction already exists');
+        // assert non-duplicated transaction in block
+        assert(this.blockchain.isTransactionIncluded(hash) === false, 'Transaction already exists in block');
+
+        // assert non-duplicate transaction in queue
+        assert(this.blockchain.getTransactions().find(i => i.header.hash === hash) === undefined, 'Transaction already exists in queue');
     }
 
     async #broadcastTransaction(body) {

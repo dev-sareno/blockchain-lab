@@ -41,7 +41,6 @@ module.exports = (app, blockchain) => {
     
     // /network
     app.post('/network/connect', async (req, res) => {
-        console.log('connect called()');
         const network = await networkManager.connect(req.body);
         res.status(network ? 200 : 400)
             .send(network ? network : 'Node registration falied');
@@ -52,6 +51,11 @@ module.exports = (app, blockchain) => {
     });
 
     app.get('/network', (req, res) => {
-        res.send(blockchain.getNetwork());
+        res.send(networkManager.getNetwork());
+    });
+
+    app.post('/network/broadcast', (req, res) => {
+        networkManager.receiveBroadcast(req.body);
+        res.send('ok');
     });
 }
