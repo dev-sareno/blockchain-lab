@@ -1,17 +1,19 @@
 # SpongeJS Blockchain 🧱⛓
 
 ## Important Notes!
-- This is a personal project and it's far away for being better than a dumb
-- This blockchain is intended to be a "networked blockchain" but for some technical reasons of how NodeJs (Express) behaves, this cannot be achieve, so it is better to assume that this is a "single-node blockchain"
+- This is a personal project and it's far away from being better than a dumb
+- This blockchain is intended to be a "networked blockchain" but for some technical reasons of how NodeJs (Express) behaves, this cannot be achieved, so it is better to assume that this is a "single-node blockchain"
 - All data is stored in memory (no database)
 - Uses HTTP protocol (for simplicity) for communicating nodes
 - Use the ReactJS web app "reactjs-client" to test and create transactions
 - Swagger API doc is at `<hostname>/doc`
 - Block size is `3 transactions` by default
-- Mining difficulty is placed in Blockchain class `static #DIFFICULTY = '0000';`
-- This is a general-purpose blockchain so you can store any form of data (e.g., cryptocurrency)
+- Mining difficulty can be adjusted in Blockchain class `static #DIFFICULTY = '0000';`
+- This is a general-purpose blockchain so you can store any form of data such as cryptocurrency, patents, transactions, records, etc.
 
 ## Capabilities
+1. Private/Public key 🔐
+1. Signing/verifying 📝
 1. Create transaction 🔨
 1. Validate transaction 📝
 1. Transaction broadcasting 📜
