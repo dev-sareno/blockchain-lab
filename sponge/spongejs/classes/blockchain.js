@@ -43,7 +43,7 @@ const getGenesisTransaction = () => {
 };
 
 class Blockchain {
-    static #DIFFICULTY = '00000';
+    static #DIFFICULTY = '0000';
     static #TXN_PER_BLOCK = 3;
     #chain = [];
     #transactions = [];
