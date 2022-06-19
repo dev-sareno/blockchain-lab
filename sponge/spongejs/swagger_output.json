@@ -86,6 +86,17 @@
         }
       }
     },
+    "/chain/new-block/broadcast": {
+      "post": {
+        "description": "",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/network/connect": {
       "post": {
         "description": "",

@@ -2,8 +2,7 @@ const { assert } = require('chai');
 const CryptoJS = require('crypto-js');
 const { verifySignature } = require('../utility/cryptUtil.js');
 const { Transaction } = require('../classes/blockchain.js');
-const { create: axiosCreate } = require('axios');
-const { PORT } = require('../app.config.js');
+const http = require('../http.js');
 
 class TransactionManager {
     constructor(blockchain) {
@@ -37,10 +36,11 @@ class TransactionManager {
             const shouldSend = exclude.find(i => i === address) === undefined;
             if (shouldSend) {
                 try {
-                    const {status} = await axiosCreate({
-                        baseURL: `http://${address}/`,
-                        timeout: 5000, // 5sec
-                    }).post('transaction/broadcast', body);
+                    const {status} = await http.post(
+                        `http://${address}/`,
+                        'transaction/broadcast',
+                        body,
+                    );
                     if (status < 200 || status > 299) {
                         console.log(`failed to broadcast transaction to ${address}; status=${status}`);
                     }
@@ -59,7 +59,7 @@ class TransactionManager {
             body.header.publicKey,
             body.header.hash
         );
-        this.blockchain.addTransactions([txn]);
+        const latestBlock = this.blockchain.addTransactions([txn]);
 
         // broadcast transaction
         const data = {
@@ -67,6 +67,11 @@ class TransactionManager {
             transaction: txn,
         };
         await this.#broadcastTransaction(data);
+
+        if (latestBlock) {
+            // broadcast latest block
+            this.#broacastLatestBlock(latestBlock);
+        }
     }
 
     async receiveBroadcast(body) {
@@ -79,7 +84,7 @@ class TransactionManager {
         }
 
         // add to transactions
-        this.blockchain.addTransactions([body.transaction]);
+        const latestBlock = this.blockchain.addTransactions([body.transaction]);
 
         // rebroadcast transaction
         const data = {
@@ -90,6 +95,30 @@ class TransactionManager {
             ]
         };
         await this.#broadcastTransaction(data);
+
+        if (latestBlock) {
+            // broadcast latest block
+            this.#broacastLatestBlock(latestBlock);
+        }
+    }
+
+    #broacastLatestBlock(block) {
+        for (const {address} of this.blockchain.getNetwork()) {
+            try {
+                (async () => {
+                    await http.post(
+                        `http://${address}/`,
+                        'chain/new-block/broadcast',
+                        {
+                            address: this.blockchain.getNodeAddress(),
+                            chainLength: this.blockchain.getChain().length,
+                        }
+                    );
+                })();
+            } catch (e) {
+                console.log(`failed to brodcast block to ${address}. ${e}`);
+            }
+        }
     }
 }
 

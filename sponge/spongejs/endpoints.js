@@ -1,9 +1,11 @@
 const { TransactionManager } = require('./managers/transactionManager.js');
 const { NetworkManager } = require('./managers/networkManager.js');
+const { BlockManager } = require('./managers/blockManager.js');
 
 module.exports = (app, blockchain) => {
     const txnManager = new TransactionManager(blockchain);
     const networkManager = new NetworkManager(blockchain);
+    const blockManager = new BlockManager(blockchain);
 
     // /debug
     app.post('/debug/chain/add-invalid-block', (req, res) => {
@@ -37,6 +39,11 @@ module.exports = (app, blockchain) => {
     
     app.get('/chain/isvalid', (req, res) => {
         res.send(blockchain.isChainValid(blockchain.getChain()));
+    });
+    
+    app.post('/chain/new-block/broadcast', async (req, res) => {
+        await blockManager.receiveBroadcast(req.body);
+        res.send('ok');
     });
     
     // /network

@@ -1,5 +1,5 @@
 const { assert } = require('chai');
-const { create: axiosCreate } = require('axios');
+const http = require('../http.js');
 const { NetworkNode } = require('../classes/blockchain');
 
 class NetworkManager {
@@ -12,10 +12,11 @@ class NetworkManager {
             const address = body.address;
             assert(address !== undefined && address !== null, 'Invalid address');
             // ping node
-            const {status} = await axiosCreate({
-                baseURL: `http://${address}/`,
-                timeout: 1000, // 1sec
-            }).get('network/ping');
+            const {status} = await http.get(
+                `http://${address}/`,
+                'network/ping',
+                1000,
+            );
             assert(status === 200, 'Node unreachable');
             // add to network
             this.blockchain.addNetworkNode(new NetworkNode(address));
@@ -46,10 +47,11 @@ class NetworkManager {
             const shouldSend = exclude.find(i => i === address) === undefined;
             if (shouldSend) {
                 try {
-                    const {status} = await axiosCreate({
-                        baseURL: `http://${address}/`,
-                        timeout: 5000, // 5sec
-                    }).post('network/broadcast', data);
+                    const {status} = await http.post(
+                        `http://${address}/`,
+                        'network/broadcast',
+                        data,
+                    );
                     if (status < 200 || status > 299) {
                         console.log(`failed to broadcast network to ${address}; status=${status}`);
                     }

@@ -1,6 +1,7 @@
-const { create: axiosCreate } = require("axios");
+const http = require('../http.js');
 const CryptoJS = require("crypto-js");
 const { PORT } = require("../app.config");
+const { randomNumber } = require('../utility/randomUtil.js');
 
 class Block {
     constructor(previousHash, nonce, timestamp, transactions) {
@@ -42,7 +43,7 @@ const getGenesisTransaction = () => {
 };
 
 class Blockchain {
-    static #DIFFICULTY = '000';
+    static #DIFFICULTY = '00000';
     static #TXN_PER_BLOCK = 3;
     #chain = [];
     #transactions = [];
@@ -50,6 +51,7 @@ class Blockchain {
     // instead, we store transactions in in-memory database
     #chainTransactions = new Set();
     #network = [];
+    #miningAbortToken = undefined;
 
     constructor() {
         const genesisTxn = getGenesisTransaction();
@@ -61,12 +63,13 @@ class Blockchain {
 
     async joinNetwork(networkAddress) {
         try {
-            const {data} = await axiosCreate({
-                baseURL: `http://${networkAddress}/`,
-                timeout: 5000, // 5sec
-            }).post('network/connect', {
-                address: this.getNodeAddress(),
-            });
+            const {data} = await http.post(
+                `http://${networkAddress}/`,
+                'network/connect',
+                {
+                    address: this.getNodeAddress(),
+                }
+            );
             if (data) {
                 for (const node of data) {
                     this.addNetworkNode(node);
@@ -90,8 +93,14 @@ class Blockchain {
 
     mineBlock(previousHash, transactions) {
         console.log('mining new block');
-        let nonce = 0;
+        let nonce = randomNumber(0, 9999999);
         while (true) {
+            // check for abort token
+            if (this.#miningAbortToken) {
+                const errorMsg = 'Mining is aborted. Token = ' + this.#miningAbortToken;
+                this.#miningAbortToken = undefined; // clear
+                throw Error(errorMsg);
+            }
             const block = new Block(
                 previousHash,
                 nonce,
@@ -113,6 +122,7 @@ class Blockchain {
         /*
         Assumes all param:transactions here is not a duplicate
         */
+        let latestBlock = undefined;
         this.#transactions.push(...transactions);
         if (this.#transactions.length >= Blockchain.#TXN_PER_BLOCK) {
             // mine new block
@@ -121,6 +131,7 @@ class Blockchain {
             const txns = this.#transactions.splice(0, Blockchain.#TXN_PER_BLOCK);
             const newBlock = this.mineBlock(lastBlock.header.hash, txns);
             this.#chain.push(newBlock);
+            latestBlock = newBlock;
             for (const txn of txns) {
                 // add to chain's transaction
                 this.#chainTransactions.add(txn.header.hash);
@@ -129,6 +140,34 @@ class Blockchain {
                 this.addTransactions([]);
             }
         }
+        return latestBlock;
+    }
+
+    abortCurrentMining(token) {
+        this.#miningAbortToken = token;
+    }
+
+    replaceChain(newChain) {
+        const newChainTransactions = new Set();
+        for (const block of newChain) {
+            for (const txn of block.transactions) {
+                const txnHash = txn.header.hash;
+                newChainTransactions.add(txnHash);
+            }
+        }
+        this.chain = newChain;
+        this.#chainTransactions = newChainTransactions;
+        console.log(`chain has been replaced; chain length is ${newChain.length}; txn length is ${newChainTransactions.length}`);
+    }
+
+    syncTransactions() {
+        const newList = [];
+        for (const txn of this.#transactions) {
+            if (!this.isTransactionIncluded(txn.header.hash)) {
+                newList.push(txn);
+            }
+        }
+        this.#transactions = newList;
     }
 
     isChainValid(chain) {
@@ -165,7 +204,6 @@ class Blockchain {
     }
 
     isTransactionIncluded(txnHash) {
-        console.log('chainTransactions.size=', this.#chainTransactions.size)
         return this.#chainTransactions.has(txnHash);
     }
 
