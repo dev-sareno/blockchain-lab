@@ -1,7 +1,6 @@
 # SpongeJS Blockchain 🧱⛓
 
 ## Important Notes!
-- This is a personal project and it's far away from being better than a dumb
 - This blockchain is intended to be a "networked blockchain" but for some technical reasons of how NodeJs (Express) behaves, this cannot be achieved, so it is better to assume that this is a "single-node blockchain"
 - All data is stored in memory (no database)
 - Uses HTTP protocol (for simplicity) for communicating nodes
